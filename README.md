@@ -3,7 +3,7 @@
 Este repositório contém análise exploratória, criação de modelo supervisionado de machine learning e de um relatório em Rmarkdown para dados de uma Unidade de Terapia Intensiva.
 
 <h1 align="center">
-  <img src="https://github.com/leonvictorlima/Intensive_Care_Unit_Analysis/blob/main/images/ICU.png"  width="800"/>
+  <img src="https://github.com/leonvictorlima/Intensive_Care_Unit_Analysis/blob/main/images/ICU.png"  width="300"/>
 </h1>
 
 <a name="introdução"></a>
@@ -54,7 +54,9 @@ Nesta análise os códigos foram divididos pensando em facilitar o entendimento,
 11. Relatório no formato web ".HTML": `Report_ICU.html`.
 
 
-#### OSB-01: Caso queira utilizar a renderização dos gráficos na criação de um relatório web (.HTML), por gentileza, efeuar os seguintes passsos:
+#### Observação 01:
+
+Caso queira utilizar a renderização dos gráficos na criação de um relatório web (.HTML), por gentileza, efeuar os seguintes passsos:
 
 1. Abrir o código R: `ICU_by_tools_package.R`;
 2. Efetuar o comando: `CRTL + SHIFT + K`;
@@ -62,7 +64,9 @@ Nesta análise os códigos foram divididos pensando em facilitar o entendimento,
 
 Deste modo, um relatório web no seu brownser irá abrir.
 
-#### OSB-02: Para criação dos relatórios através da biblioteca `tools_pachage.R`, por gentileza, utilizar o arquivo `Report_ICU.RMD` e a função `create_report` do pacote, 
+#### Observação 02:
+
+Para criação dos relatórios através da biblioteca `tools_pachage.R`, por gentileza, utilizar o arquivo `Report_ICU.RMD` e a função `create_report` do pacote, 
 passando como parâmetros o diretório do arquivo `Report_ICU.RMD` e o formato de saída, por exemplo: `html_document`, `word_document` ou `pdf_document`. Para o documento no formato .PDF é necessário a biblioteca LATEX instalada.
 
-### ATENÇÂO: Mantenha os arquivos no mesmo diretório.
+#### ATENÇÂO: Mantenha os arquivos no mesmo diretório.
