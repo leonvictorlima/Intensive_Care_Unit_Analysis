@@ -48,7 +48,7 @@ Nesta análise os códigos foram divididos pensando em facilitar o entendimento,
 5. Biblioteca R construída para esta análise e gráficos: `tools_package.R`;
 6. Código contendo análise e gráficos através da biblioteca "tools_package": `ICU_by_tools_package.R`;
 7. Código exemplificando o tratamento dos dados, predição via modelo de machine learning e criação do relatório através da bilbioteca "tools_package": `ICU_Treatment_ML_Report.R`;
-8. Código com abrangendo relatório Rmardown "Rmd": `Report_ICU.RMD`;
+8. Código abrangendo relatório Rmardown "Rmd": `Report_ICU.RMD`;
 9. Relatório no formato PDF ".pdf": `Report_ICU.pdf`;
 10. Relatório no formato DOC ".docx": `Report_ICU.docx`;
 11. Relatório no formato web ".HTML": `Report_ICU.html`.
