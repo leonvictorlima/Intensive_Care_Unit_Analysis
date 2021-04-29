@@ -1,0 +1,313 @@
+---
+title: "ICU Report"
+author: "Leon Victor"
+date: "29/04/2021"
+output:
+  word_document: default
+  html_document:
+    df_print: paged
+always_allow_html: true
+---
+# Summary
+This project is part of EpimedSolutions challenge. Its description is showed
+below:
+
+ You have also received the file "dataset.RData" together with this document. The .RData file contains data on 10.000 patients that has been admitted to a certain Intensive Care Unit (ICU). It is your responsibility to create an R package to help to analyze this data.
+
+ Steps it must have:
+
+ The package should contain functions to:
+
+ 1) make the appropriate treatment to the dataset.
+ 2) produce some plots to understand the relationship between the variables
+ and get some insights about what increases the chances of 
+ a patient to die in this ICU.
+ 3) make predictions about the probability of a patient to die in this ICU.
+ 4) produce a final report – in English! – using the other 
+ functions created to describe the results you got while analyzing data.
+
+ Variables descriptions:
+
+ 1. UnitAdmissionId: unique identifier for each patient.
+ 2. Age: age of patient (in years).
+ 3. Gender: gender of patient (“F” for female and “M” for male).
+ 4. UnitDischargeCode: "A" (alive) or "D" (dead) at the end of admission.
+ 5. UnitLengthStay: number of days each patient has been in the ICU.
+ 6. IsArterialHypertension: indicates if the patient has arterial hypertension.
+ 7. IsDiabetesComplicated: indicates if the patient has diabetes.
+
+# Report
+As part of the analysis, it is fundamental to the use of "tools_package.R" file which follows this report on the same fold.
+
+##### Loading the dataset and package
+The initial step is to load the dataset to start its analysis as well as some libraries required.
+```{r, chunk0,cache=TRUE,echo=FALSE,warning=FALSE}
+library(dplyr)
+library(ggplot2)
+library(plotly)
+library(webshot)
+
+source('tools_package.R')
+load("dataset.RData")
+df <- dt
+```
+#### Data cleaning and treatment
+
+Then loaded, we must clean the dataset to provide concise elements for use in exploratory analysis. The package "tools_packages.R" has several functions which will guide any approaches on this report.
+
+After the treatment, the new values for data is determined as following: Male = 1, Female = 0, Died = 1 ,and Alive = 0.
+
+```{r, chunk1, cache=TRUE,, dependson='chunk0',echo=FALSE, warning=FALSE}
+# Cleaning NA values
+df <- clean_dataframe(df)
+
+# Convert variables format to factor and numeric
+var_factor_list <- list('UnitDischargeCode', 'Gender', 'IsArterialHypertension',
+                        'IsDiabetesComplicated')
+var_num_list <- list("Age","UnitLengthStay")
+
+# Calling function
+df2 <- df %>% tofactor(var_factor_list) %>% tonumeric(var_num_list)
+
+# Reordering dataframe and drop index out
+order_array <- c(2,3,5,6,7,4)
+df3 = reorder_dataframe(dataframe = df2, array_columns = order_array)
+```
+#### Exploratory Analysis 
+
+The first step in this segment is to understand the distribution of age in UCI. Making use of simple elements, it is possible to have in mind the type of the data and circumstances to identify any disequilibrium in the dataset. 
+ 
+Insight: The major ages are between 60 and 80 years.
+
+
+```{r, chunk2, cache=TRUE, dependson='chunk1', echo=FALSE, fig.dim = c(5,5)}
+# Plotting  Age's histogram
+plot.hist(value = as.numeric(df3$Age),bins = 10, main_label.text = "Distribution of Age", y_label.text = 'Quantity', x_label.text = 'Age')
+```
+
+In addition, here is showed how is distributed the gender in the UCI. It helps
+observe whether men or women have been getting into UCI more.
+
+Insight: The allocation of both genders is the same.
+
+```{r, chunk3, cache=TRUE, dependson=c('chunk0','chunk1'), echo=FALSE, fig.dim = c(5,5)}
+# Plotting  Gender segmentation
+piechart <- plot.pie(value = table(df3$Gender),
+                     labels = c('male','female'),
+                     main_label.text = 'UCI Gender Catalog')
+
+htmlwidgets::saveWidget(widget = piechart, file = "hc.html")
+webshot(url = "hc.html", file = "hc.png", delay = 1, zoom = 4, vheight = 500)
+
+```
+
+Diving deeply into this subject yet, Using a boxplot we can see some important aspects related to gender and age from UCI patients.
+
+Insights:
+
+1. Women age is more than the men age;
+
+2. The concentration of 25 % of ages are around: 55 years old for both;
+
+3. Median: Men is less than Women;
+
+4. 75 % is around 80 years old for Women, while 75 years old for men;
+
+5. Both have some youngs in UCI, the men years range is more than women though.
+
+```{r, chunk4, cache=TRUE, dependson=c('chunk0','chunk1'), echo=FALSE, fig.dim = c(5,5)}
+# Plotting  Gender segmentation
+
+plot.boxplot(dataframe = df3, y=df3$Age, x=df3$Gender,fill=df3$Gender,
+             y_label.text = 'Age', x_label.text = 'Gender',
+             legend_labels.text = c('Female', 'Male'),
+             legend.text = 'Gender',
+             title.text = 'Boxplot of Gender by Age')
+```
+
+The total of dead and alive is a precious measurement that contributes to creating an overview of how many people did not survive.
+
+Insight: The number of patients who survived is pretty superior for not survived. 
+
+```{r, chunk5, cache=TRUE, dependson=c('chunk0','chunk1'), echo=FALSE, fig.dim = c(5,5)}
+
+barchart <- plot.bar(x=c("Alive","Died"), y = table(df3$UnitDischargeCode),
+                     title.text = 'Total Died by Age',
+                     x_label.text = 'Age',
+                     y_label.text = 'Died')
+
+htmlwidgets::saveWidget(widget = barchart, file = "hc1.html")
+webshot(url = "hc1.html", file = "hc1.png", delay = 1, zoom = 4, vheight = 500)
+
+```
+
+In addition to the last plot, to have it more precisely and segmented by gender brings the concept of how it is distributed.
+
+Insight: There is no difference between the total of women or men who died or survived.
+
+```{r, chunk6, cache=TRUE, dependson=c('chunk0','chunk1'), echo=FALSE, fig.dim = c(5,5)}
+
+# Filtering data
+
+male <- df3 %>% filter(df3$Gender == 1)
+female <- df3 %>% filter(df3$Gender == 0)
+
+
+stackchart <- plot.stackbar(x = c('alive', 'died'),
+                            y=table(male$UnitDischargeCode),
+                            namestack01.text = 'Male',
+                            y2 = table(female$IsDiabetesComplicated),
+                            namestack02.text = 'female',
+                            main_title.text = 'Total Died and Alive by Gender (Unit Discharge Code)')
+
+htmlwidgets::saveWidget(widget = stackchart, file = "hc2.html")
+webshot(url = "hc2.html", file = "hc2.png", delay = 1, zoom = 4, vheight = 500)
+
+
+```
+
+As previously exhibited, there is not a massive difference in the number of lost lives for gender. In this subject yet, another observation is showed by Total Died by Age. and it is observed how many lost their lives segregated by age. 
+
+Insights: 
+
+1. People with more than 60 (sixty) years are a substantial mass;
+
+2. 04 (four) babies, 0 (zero) age, lost their lives as well.
+
+```{r, chunk7, cache=TRUE, dependson=c('chunk0','chunk1'), echo=FALSE, fig.dim = c(5,5)}
+
+# Filtering data
+
+df3_age_dead <- df3 %>% subset(select = c(1,6))
+df3_age_dead_table <- data.frame(table(df3_age_dead))
+df3_age_dead_table <- df3_age_dead_table %>% filter(UnitDischargeCode == 1)
+
+barchart2 <- plot.bar(x=df3_age_dead_table$Age,
+                      y = df3_age_dead_table$Freq,
+                      title.text = 'Total Died by Age',
+                      x_label.text = 'Age',
+                      y_label.text = 'Died')
+
+htmlwidgets::saveWidget(widget = barchart2, file = "hc3.html")
+webshot(url = "hc3.html", file = "hc3.png", delay = 1, zoom = 4, vheight = 500)
+
+```
+
+Furthermore, How is the behavior of people in the rooms?
+
+Insights:
+
+1. Most of the time, the rooms are occupied for 01 (one) day;
+
+2. People who are alive concentrate more attend for rooms;
+
+3. As long as the number of days decreases, the number of people making use of rooms is less.
+
+```{r, chunk8, cache=TRUE, dependson=c('chunk0','chunk1'), echo=FALSE, fig.dim = c(5,5)}
+
+# Selecting variables 
+df3_unit <- df3 %>% subset(select = c(3,6))
+
+# Count and transform in dataframe 
+df3_unit <- data.frame(table(df3_unit))
+
+# Spliting values for Alive and Died
+df3_unit_died <- filter(df3_unit, UnitDischargeCode == 1)
+df3_unit_alive <- filter(df3_unit, UnitDischargeCode == 0)
+
+linechart <- plot.linear_run(x = df3_unit_alive$UnitLengthStay,
+                             y=df3_unit_alive$Freq,
+                             name01 = 'Alive',
+                             y2 = df3_unit_died$Freq,
+                             name02 = 'Died',
+                             title.text = 'Quantity of the Days Hosted by room',
+                             x_label.text = 'Room',
+                             y_label.text = 'Number of the days hosted')
+
+htmlwidgets::saveWidget(widget = linechart, file = "hc4.html")
+webshot(url = "hc4.html", file = "hc4.png", delay = 1, zoom = 4, vheight = 500)
+
+```
+
+The last analysis step is the relation between Arterial Hypertension and Diabetes. This insight is also related to people who have died.
+
+Insights:
+
+1. The result shows most parts of patients have Hypertension and no Diabetes;
+
+2. Meanwhile, the second big part of patients has none;
+
+3. More dead for Hypertension and none disease.
+
+```{r, chunk9, cache=TRUE, dependson=c('chunk0','chunk1'), echo=FALSE, fig.dim = c(5,5)}
+
+# Set and Filtering the data
+
+# Dead
+
+df3_hyper_diab_dead <- df3 %>% subset(select = c(4:6))
+df3_hyper_diab_dead <- data.frame(table(df3_hyper_diab_dead))
+df3_hyper_diab_dead <- df3_hyper_diab_dead %>% filter(UnitDischargeCode == 1)
+
+# Alive
+
+df3_hyper_diab_alive <- df3 %>% subset(select = c(4:6))
+df3_hyper_diab_alive <- data.frame(table(df3_hyper_diab_alive))
+df3_hyper_diab_alive <- df3_hyper_diab_alive %>% filter(UnitDischargeCode == 0)
+
+# plotting
+
+status <- c('None',
+            'Just Hypertension',
+            'Just Diabetes ',
+            'Both')
+
+barchart3 <- plot.newbar(df3_hyper_diab_dead$Freq,
+                         y = status, name01 = 'Died',
+                         x2 = df3_hyper_diab_alive$Freq,
+                         name02 = 'Alive',
+                         title.text = 'Total Died and Alive by Hypertension and Diabetes',
+                         x_label.text = 'Quantity',
+                         y_label.text = 'Condition')
+
+htmlwidgets::saveWidget(widget = barchart3, file = "hc5.html")
+webshot(url = "hc5.html", file = "hc5.png", delay = 1, zoom = 4, vheight = 500)
+
+```
+
+# Conclusions
+
+1. The most of people who use the UCI are between 60 to 80 years old;
+
+2. Basically, there is no concentration of gender in UCI. Both have almost the same population;
+
+3. Women age is more than the men age;
+
+4. The concentration of 25 % of ages are around: 55 years old for both;
+
+5. Median: Men is less than Women;
+
+6. 75 % is around 80 years old for Women, while 75 years old for men;
+
+7. Both have some youngs in UCI, the men years range is more than women though;
+
+8. The number of patients who survived is pretty superior for not survived;
+
+9. There is no difference in the number of deaths by gender. They are very similar;
+
+10. About deaths: people with more than 60 years are the majority;
+
+11. 04 (four) babies, 0 (zero) age, lost their lives;
+
+12. Most of the time, the rooms are occupied for 01 (one) day;
+
+13. People who alive concentrate more attend for rooms;
+
+14. As long as the number of days decreases, the number of people making use of decreases;
+
+15. Most of the patients have Hypertension and no Diabetes;
+
+16. the second big part of patients do not have any disease;
+
+17. Majority of deaths are from Hypertension and none disease. 
+
